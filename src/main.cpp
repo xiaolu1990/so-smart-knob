@@ -29,38 +29,41 @@ using namespace esp_panel::board;
 
 /*Knob event definition*/
 ESP_Knob *knob;
-void onKnobLeftEventCallback(int count, void *usr_data)
+static void knob_left_event_cb(int count, void *usr_data)
 {
     // Serial.printf("Detect left event, count is %d\n", count);
     lvgl_port_lock(-1);
-    LVGL_knob_event((void*)KNOB_LEFT);
+    LVGL_knob_event(UI_KNOB_LEFT);
     lvgl_port_unlock();
 }
 
-void onKnobRightEventCallback(int count, void *usr_data)
+static void knob_right_event_cb(int count, void *usr_data)
 {
     // Serial.printf("Detect right event, count is %d\n", count);
     lvgl_port_lock(-1);
-    LVGL_knob_event((void*)KNOB_RIGHT);
+    LVGL_knob_event(UI_KNOB_RIGHT);
     lvgl_port_unlock();
 }
 
-static void SingleClickCb(void *button_handle, void *usr_data) {
+static void single_click_event_cb(void *button_handle, void *usr_data) {
     // Serial.println("Button Single Click");
     lvgl_port_lock(-1);
-    LVGL_button_event((void*)BUTTON_SINGLE_CLICK);
+    LVGL_button_event(UI_BUTTON_SINGLE_CLICK);
     lvgl_port_unlock();
 }
 
-static void DoubleClickCb(void *button_handle, void *usr_data)
+static void double_click_event_cb(void *button_handle, void *usr_data)
 {
     // Serial.println("Button Double Click");
+    lvgl_port_lock(-1);
+    LVGL_button_event(UI_BUTTON_DOUBLE_CLICK);
+    lvgl_port_unlock();
 }
 
-static void LongPressStartCb(void *button_handle, void *usr_data) {
+static void long_press_event_cb(void *button_handle, void *usr_data) {
     // Serial.println("Button Long Press Start");
     lvgl_port_lock(-1);
-    LVGL_button_event((void*)BUTTON_LONG_PRESS_START);
+    LVGL_button_event(UI_BUTTON_LONG_PRESS_START);
     lvgl_port_unlock();
 }
 
@@ -96,14 +99,14 @@ void setup()
     Serial.println("Initialize Knob device");
     knob = new ESP_Knob(GPIO_NUM_KNOB_PIN_A, GPIO_NUM_KNOB_PIN_B);
     knob->begin();
-    knob->attachLeftEventCallback(onKnobLeftEventCallback);
-    knob->attachRightEventCallback(onKnobRightEventCallback);
+    knob->attachLeftEventCallback(knob_left_event_cb);
+    knob->attachRightEventCallback(knob_right_event_cb);
 
     Serial.println("Initialize Button device");
     Button *btn = new Button(GPIO_BUTTON_PIN, false);
-    btn->attachSingleClickEventCb(&SingleClickCb, NULL);
-    btn->attachDoubleClickEventCb(&DoubleClickCb, NULL);
-    btn->attachLongPressStartEventCb(&LongPressStartCb, NULL);
+    btn->attachSingleClickEventCb(&single_click_event_cb, NULL);
+    btn->attachDoubleClickEventCb(&double_click_event_cb, NULL);
+    btn->attachLongPressStartEventCb(&long_press_event_cb, NULL);
 
     Serial.println("Creating UI");
     /* Lock the mutex due to the LVGL APIs are not thread-safe */

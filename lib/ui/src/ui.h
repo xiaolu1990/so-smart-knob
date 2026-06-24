@@ -11,94 +11,75 @@ extern "C"
 #include "ui_helpers.h"
 #include "ui_events.h"
 
-// Typedefs
-typedef struct {
-    const lv_img_dsc_t *image;
-    const char *text;
-    uint8_t id;
-} ui_icon_t;
+    // Typedefs
+    typedef struct
+    {
+        const lv_img_dsc_t *image;
+        const char *text;
+        uint8_t id;
+    } ui_icon_t;
+
+    typedef enum
+    {
+        UI_KNOB_LEFT = 0,  /*!< EVENT: Rotate to the left */
+        UI_KNOB_RIGHT,     /*!< EVENT: Rotate to the right */
+        UI_KNOB_H_LIM,     /*!< EVENT: Count reaches maximum limit */
+        UI_KNOB_L_LIM,     /*!< EVENT: Count reaches the minimum limit */
+        UI_KNOB_ZERO,      /*!< EVENT: Count back to 0 */
+        UI_KNOB_EVENT_MAX, /*!< EVENT: Number of events */
+        UI_KNOB_NONE,      /*!< EVENT: No event */
+    } ui_knob_event_t;
+
+    typedef enum
+    {
+        UI_BUTTON_PRESS_DOWN = 0,
+        UI_BUTTON_PRESS_UP,
+        UI_BUTTON_PRESS_REPEAT,
+        UI_BUTTON_PRESS_REPEAT_DONE,
+        UI_BUTTON_SINGLE_CLICK,
+        UI_BUTTON_DOUBLE_CLICK,
+        UI_BUTTON_MULTIPLE_CLICK,
+        UI_BUTTON_LONG_PRESS_START,
+        UI_BUTTON_LONG_PRESS_HOLD,
+        UI_BUTTON_LONG_PRESS_UP,
+        UI_BUTTON_PRESS_END,
+        UI_BUTTON_EVENT_MAX,
+        UI_BUTTON_NONE_PRESS,
+    } ui_button_event_t;
+
+// SCREEN PROPERTIES
+#define SCREEN_WIDTH 480
+#define SCREEN_HEIGHT 480
 
 // COLORS
 #define UI_COLOR_BLACK lv_color_hex(0x000000)
 #define UI_COLOR_WHITE lv_color_hex(0xFFFFFF)
 #define UI_COLOR_LILA lv_color_hex(0x622181) // #622181
 
-// IMAGES AND IMAGE SETS
-LV_IMG_DECLARE(splash_screen);
-LV_IMG_DECLARE(background);
-LV_IMG_DECLARE(lower_jaw_64x64);
-LV_IMG_DECLARE(upper_jaw_64x64);
-LV_IMG_DECLARE(multcase_tray_64x64);
-LV_IMG_DECLARE(universal_scan_64x64);
-LV_IMG_DECLARE(correction_scan_64x64);
+    // IMAGES AND IMAGE SETS
+    LV_IMG_DECLARE(splash_screen);
+    LV_IMG_DECLARE(background);
+    LV_IMG_DECLARE(lower_jaw_64x64);
+    LV_IMG_DECLARE(upper_jaw_64x64);
+    LV_IMG_DECLARE(multcase_tray_64x64);
+    LV_IMG_DECLARE(universal_scan_64x64);
+    LV_IMG_DECLARE(correction_scan_64x64);
 
-// SCREEN: ui_main_screen
-void ui_splash_screen_init(void);
-void ui_main_screen_init(void);
+    // SCREEN: ui_splash_screen
+    void ui_splash_screen_init(void);
 
-extern lv_obj_t *ui_splash_screen; // splash screen object
-extern lv_obj_t *ui_main_screen; // main screen object
+    // SCREEN: ui_main_screen
+    void ui_main_screen_init(void);
 
-// SCREEN: ui_Screen1
-void ui_Screen1_screen_init(void);
-extern lv_obj_t *ui_Screen1;
-void ui_event_background(lv_event_t *e);
-extern lv_obj_t *ui_background;
-extern lv_obj_t *ui_Image1;
-void ui_event_Button1(lv_event_t *e);
-extern lv_obj_t *ui_Button1;
-void ui_event_Button2(lv_event_t *e);
-extern lv_obj_t *ui_Button2;
-// CUSTOM VARIABLES
+    extern lv_obj_t *ui_splash_screen; // splash screen object
+    extern lv_obj_t *ui_main_screen;   // main screen object
 
-// SCREEN: ui_time
-void ui_time_screen_init(void);
-void ui_event_time(lv_event_t *e);
-extern lv_obj_t *ui_time;
-extern lv_obj_t *ui_Roller1;
-void ui_event_Button4(lv_event_t *e);
-extern lv_obj_t *ui_Button4;
-void ui_event_Button5(lv_event_t *e);
-extern lv_obj_t *ui_Button5;
-extern lv_obj_t *ui_Image3;
-extern lv_obj_t *ui_Image4;
-// CUSTOM VARIABLES
+    extern lv_obj_t *ui____initial_actions0;
 
-// SCREEN: ui_working
-void ui_working_screen_init(void);
-extern lv_obj_t *ui_working;
-extern lv_obj_t *ui_Spinner1;
-extern lv_obj_t *ui_Bar1;
-void ui_event_Button6(lv_event_t *e);
-extern lv_obj_t *ui_Button6;
-extern lv_obj_t *ui_Label1;
-extern lv_obj_t *ui_Label2;
-extern lv_obj_t *ui_Label3;
-// CUSTOM VARIABLES
-
-// EVENTS
-
-extern lv_obj_t *ui____initial_actions0;
-
-// IMAGES AND IMAGE SETS
-LV_IMG_DECLARE(ui_img_1kaorou_png);  // assets/1kaorou.png
-LV_IMG_DECLARE(ui_img_2kaoji_png);   // assets/2kaoji.png
-LV_IMG_DECLARE(ui_img_3danta_png);   // assets/3danta.png
-LV_IMG_DECLARE(ui_img_4pisa_png);    // assets/4pisa.png
-LV_IMG_DECLARE(ui_img_5liupai_png);  // assets/5liupai.png
-LV_IMG_DECLARE(ui_img_6shutiao_png); // assets/6shutiao.png
-LV_IMG_DECLARE(ui_img_black_png);    // assets/black.png
-LV_IMG_DECLARE(ui_img_start_png);    // assets/start.png
-LV_IMG_DECLARE(ui_img_1522004715);   // assets/set-time.png
-LV_IMG_DECLARE(ui_img_362584155);    // assets/return-png.png
-LV_IMG_DECLARE(ui_img_174066631);    // assets/ok-icon.png
-LV_IMG_DECLARE(ui_img_min_png);      // assets/min.png
-LV_IMG_DECLARE(ui_img_1620963198);   // assets/time-png.png
-
-void LVGL_knob_event(void *event);
-void LVGL_button_event(void *event);
-// UI INIT
-void ui_init(void);
+    // Function declarations in ui.c
+    void LVGL_knob_event(ui_knob_event_t event);
+    void LVGL_button_event(ui_button_event_t event);
+    void ui_init(void);
 
 #ifdef __cplusplus
 } /*extern "C"*/
