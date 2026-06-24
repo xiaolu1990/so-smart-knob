@@ -1,4 +1,15 @@
 {
 	"folders": [],
+	"extensions": {
+		"recommendations": [
+			"pioarduino.pioarduino-ide",
+			"cschlosser.doxdocgen"
+		],
+		"unwantedRecommendations": [
+			"Jason2866.esp-decoder",
+			"platformio.platformio-ide",
+			"ms-vscode.cpptools-extension-pack"
+		]
+	},
 	"settings": {}
 }
