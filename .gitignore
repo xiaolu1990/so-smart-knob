@@ -1,0 +1,4 @@
+.pio/
+.vscode/
+boards/
+lib/ui/src/images/
