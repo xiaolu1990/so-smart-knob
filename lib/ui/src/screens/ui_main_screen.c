@@ -2,16 +2,15 @@
 
 lv_obj_t *ui_splash_screen = NULL;
 lv_obj_t *ui_main_screen = NULL;
-lv_obj_t *ui_label_scan_target = NULL;
+lv_obj_t *ui_label_debug = NULL;
 
 static void splash_timer_cb(lv_timer_t *timer);
-static void create_main_screen(void);
 
 /**
- * @brief Initialize the main screen
+ * @brief Initialize the splash screen
  *
  */
-void ui_main_screen_init(void)
+void ui_splash_screen_init(void)
 {
     ui_splash_screen = lv_obj_create(NULL);
 
@@ -31,7 +30,8 @@ void ui_main_screen_init(void)
 static void splash_timer_cb(lv_timer_t *timer)
 {
     // 1. Create and load the main screen
-    create_main_screen();
+    ui_main_screen_init();
+    lv_scr_load(ui_main_screen);
 
     // 2. Clean up the splash screen to free memory
     if (ui_splash_screen != NULL)
@@ -45,25 +45,23 @@ static void splash_timer_cb(lv_timer_t *timer)
  * @brief Create and load the main screen
  *
  */
-static void create_main_screen(void)
+void ui_main_screen_init(void)
 {
     ui_main_screen = lv_obj_create(NULL);
-    ui_label_scan_target = lv_label_create(ui_main_screen);
-
+    
     static lv_style_t style;
     lv_style_init(&style);
-
+    
     // setup the default style for the main screen
-    lv_style_set_text_font(&style, &lv_font_montserrat_20);
+    lv_style_set_text_font(&style, &lv_font_montserrat_24);
     lv_style_set_text_color(&style, UI_COLOR_LILA);
     
-    lv_obj_add_style(ui_label_scan_target, &style, 0);
-
+    lv_obj_add_style(ui_main_screen, &style, 0);
+    
     lv_obj_set_style_bg_img_src(ui_main_screen, &background, 0);
-
-    lv_label_set_text(ui_label_scan_target, "Scan Target");
-    lv_obj_align(ui_label_scan_target, LV_ALIGN_CENTER, 0, 0);
-  
-
-    lv_scr_load(ui_main_screen);
+    
+    // create a label to display debug information on the main screen
+    ui_label_debug = lv_label_create(ui_main_screen);
+    lv_label_set_text_static(ui_label_debug, "Main Screen");
+    lv_obj_align(ui_label_debug, LV_ALIGN_BOTTOM_MID, 0, -40);
 }

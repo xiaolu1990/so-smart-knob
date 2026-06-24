@@ -11,6 +11,13 @@ extern "C"
 #include "ui_helpers.h"
 #include "ui_events.h"
 
+// Typedefs
+typedef struct {
+    const lv_img_dsc_t *image;
+    const char *text;
+    uint8_t id;
+} ui_icon_t;
+
 // COLORS
 #define UI_COLOR_BLACK lv_color_hex(0x000000)
 #define UI_COLOR_WHITE lv_color_hex(0xFFFFFF)
@@ -26,11 +33,11 @@ LV_IMG_DECLARE(universal_scan_64x64);
 LV_IMG_DECLARE(correction_scan_64x64);
 
 // SCREEN: ui_main_screen
+void ui_splash_screen_init(void);
 void ui_main_screen_init(void);
 
 extern lv_obj_t *ui_splash_screen; // splash screen object
 extern lv_obj_t *ui_main_screen; // main screen object
-extern lv_obj_t *ui_label_scan_target; // label scan target object
 
 // SCREEN: ui_Screen1
 void ui_Screen1_screen_init(void);

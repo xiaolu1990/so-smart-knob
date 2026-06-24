@@ -369,7 +369,7 @@ void ui_init(void)
 
     lv_scr_load(lv_obj_create(NULL)); // 清理默认屏幕
 
-    ui_main_screen_init();
+    ui_splash_screen_init();
 
     ui____initial_actions0 = lv_obj_create(NULL);
     
