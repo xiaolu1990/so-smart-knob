@@ -1,8 +1,9 @@
 #include "../ui.h"
 
 lv_obj_t *ui_main_screen = NULL;
-lv_obj_t *ui_label_debug = NULL;
-lv_obj_t *ui_label_item = NULL; // label to display the selected menu item
+
+static lv_obj_t *ui_label_debug = NULL;
+static lv_obj_t *ui_label_item = NULL; // label to display the selected menu item
 
 ui_icon_t menu_icons[] = {
     {&lower_jaw_64x64, "Lower Jaw", 1},
@@ -13,6 +14,7 @@ ui_icon_t menu_icons[] = {
 };
 
 static void menu_item_event_cb(lv_event_t *e);
+static void menu_container_scroll_event_cb(lv_event_t *e);
 
 /**
  * @brief Create and load the main screen
@@ -34,53 +36,56 @@ void ui_main_screen_init(void)
     lv_obj_set_layout(ui_main_screen, LV_LAYOUT_FLEX);
     lv_obj_set_flex_flow(ui_main_screen, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(ui_main_screen,
-                          LV_FLEX_ALIGN_CENTER,  // Main axis (Vertical: distribute from center)
-                          LV_FLEX_ALIGN_CENTER,  // Cross axis (Horizontal: center align items)
-                          LV_FLEX_ALIGN_CENTER); // Track alignment
+                          LV_FLEX_ALIGN_CENTER,      // Main axis (Vertical: distribute from center)
+                          LV_FLEX_ALIGN_CENTER,      // Cross axis (Horizontal: center align items)
+                          LV_FLEX_ALIGN_CENTER);     // Track alignment
+    lv_obj_set_style_pad_row(ui_main_screen, 20, 0); // Set vertical padding between items
 
-    // setup the item label to display the selected menu item
+    // -- setup the item label to display the selected menu item --
     ui_label_item = lv_label_create(ui_main_screen);
     lv_label_set_text(ui_label_item, "Lower Jaw");
 
-    lv_coord_t gap = 10;
-    lv_coord_t item_w = (SCREEN_WIDTH - (gap * 4)) / 3;
-    if (item_w < 72)
-        item_w = 72;
-    lv_coord_t item_h = item_w + 28;
+    // -- create a container to hold the menu items and display as a card view --
+    lv_obj_t *menu_container = lv_obj_create(ui_main_screen);
+    lv_coord_t gap = 20;
+    lv_coord_t item_w = (SCREEN_WIDTH - (gap * 4)) / 3; // 3 items + 4 gaps
+    if (item_w < 60)
+        item_w = 60;
+    lv_coord_t item_h = item_w;
+    lv_obj_set_size(menu_container, SCREEN_WIDTH, item_h + 20);
+    lv_obj_set_style_bg_opa(menu_container, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(menu_container, 0, 0);
 
-    lv_obj_t *menu_row = lv_obj_create(ui_main_screen);
-    lv_obj_set_size(menu_row, SCREEN_WIDTH, item_h + 8);
-    lv_obj_align(menu_row, LV_ALIGN_CENTER, 0, 30);
-
-    lv_obj_set_style_bg_opa(menu_row, LV_OPA_TRANSP, 0);
-    lv_obj_set_style_border_width(menu_row, 0, 0);
-    lv_obj_set_style_pad_top(menu_row, 8, 0);
-    lv_obj_set_style_pad_bottom(menu_row, 8, 0);
-    lv_obj_set_style_pad_column(menu_row, gap, 0);
-
-    lv_obj_set_layout(menu_row, LV_LAYOUT_FLEX);
-    lv_obj_set_flex_flow(menu_row, LV_FLEX_FLOW_ROW);
-    lv_obj_set_scroll_dir(menu_row, LV_DIR_HOR);
-    lv_obj_set_scrollbar_mode(menu_row, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_set_scroll_snap_x(menu_row, LV_SCROLL_SNAP_CENTER);
-    lv_obj_add_flag(menu_row, LV_OBJ_FLAG_SCROLL_ONE);
+    lv_obj_set_layout(menu_container, LV_LAYOUT_FLEX);
+    lv_obj_set_flex_flow(menu_container, LV_FLEX_FLOW_ROW);
+    lv_obj_set_scroll_dir(menu_container, LV_DIR_HOR);
+    lv_obj_set_scrollbar_mode(menu_container, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_scroll_snap_x(menu_container, LV_SCROLL_SNAP_CENTER);
+    lv_obj_add_flag(menu_container, LV_OBJ_FLAG_SCROLL_ONE);
+    lv_obj_set_style_pad_column(menu_container, gap, 0);
 
     const uint32_t menu_count = sizeof(menu_icons) / sizeof(menu_icons[0]);
     for (uint32_t i = 0; i < menu_count; i++)
     {
-        lv_obj_t *card = lv_btn_create(menu_row);
-        lv_obj_set_size(card, item_w, item_h);
+        lv_obj_t *button = lv_btn_create(menu_container);
+        lv_obj_set_size(button, item_w, item_h);
+        lv_obj_set_style_bg_opa(button, LV_OPA_TRANSP, 0);
+        lv_obj_set_style_border_width(button, 0, 0);
 
-        lv_obj_t *img = lv_img_create(card);
+        lv_obj_add_flag(button, LV_OBJ_FLAG_SCROLL_ON_FOCUS); // Ensure the button scrolls into view when focused
+
+        lv_obj_t *img = lv_img_create(button); // place image on the button
         lv_img_set_src(img, menu_icons[i].image);
         lv_obj_center(img);
 
-        lv_obj_add_event_cb(card, menu_item_event_cb, LV_EVENT_CLICKED, &menu_icons[i]);
+        lv_obj_add_event_cb(button, menu_item_event_cb, LV_EVENT_CLICKED, &menu_icons[i]);
     }
 
-    lv_obj_update_layout(menu_row);
+    lv_obj_add_event_cb(menu_container, menu_container_scroll_event_cb, LV_EVENT_SCROLL, NULL); // add scroll event callback to update the selected item label
 
-    // create a label for debugging purposes
+    lv_event_send(menu_container, LV_EVENT_SCROLL, NULL); // manually trigger a scroll event to ensure the first item is centered
+
+    // -- create a label for debugging purposes --
     ui_label_debug = lv_label_create(ui_main_screen);
     lv_label_set_text(ui_label_debug, "Main Screen");
     lv_obj_align(ui_label_debug, LV_ALIGN_BOTTOM_MID, 0, -20);
@@ -103,17 +108,42 @@ static void menu_item_event_cb(lv_event_t *e)
     switch (icon->id)
     {
     case 1:
-        //
+        // go to ui_subscreen_1
+        ui_subscreen_1_init();
+        lv_disp_load_scr(ui_subscreen_1);
         break;
     case 2:
-        //
+        // go to ui_subscreen_2
+        ui_subscreen_2_init();
+        lv_disp_load_scr(ui_subscreen_2);
         break;
     case 3:
+        // go to ui_subscreen_3
+        ui_subscreen_3_init();
+        lv_disp_load_scr(ui_subscreen_3);
+        break;
     case 4:
+        // go to ui_subscreen_4
+        ui_subscreen_4_init();
+        lv_disp_load_scr(ui_subscreen_4);
+        break;
     case 5:
-
+        // go to ui_subscreen_5
+        ui_subscreen_5_init();
+        lv_disp_load_scr(ui_subscreen_5);
         break;
     default:
         break;
     }
+}
+
+/**
+ * @brief Menu container scroll event callback
+ *
+ * @param e
+ */
+static void menu_container_scroll_event_cb(lv_event_t *e)
+{
+    if (lv_event_get_code(e) != LV_EVENT_SCROLL)
+        return;
 }

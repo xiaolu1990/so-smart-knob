@@ -70,6 +70,11 @@ void ui_init(void)
     lv_scr_load(lv_obj_create(NULL)); // 清理默认屏幕
 
     ui_splash_screen_init();
+    ui_subscreen_1_init();
+    ui_subscreen_2_init();
+    ui_subscreen_3_init();
+    ui_subscreen_4_init();
+    ui_subscreen_5_init();
     
     ui____initial_actions0 = lv_obj_create(NULL);
 

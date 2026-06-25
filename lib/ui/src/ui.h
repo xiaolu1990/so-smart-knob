@@ -71,8 +71,33 @@ extern "C"
     // SCREEN: ui_main_screen
     void ui_main_screen_init(void);
 
+    // SCREEN: ui_subscreen_1
+    void ui_subscreen_1_init(void);
+    void ui_subscreen_1_destroy(void);
+
+    // SCREEN: ui_subscreen_2
+    void ui_subscreen_2_init(void);
+    void ui_subscreen_2_destroy(void);
+
+    // SCREEN: ui_subscreen_3
+    void ui_subscreen_3_init(void);
+    void ui_subscreen_3_destroy(void);
+
+    // SCREEN: ui_subscreen_4
+    void ui_subscreen_4_init(void);
+    void ui_subscreen_4_destroy(void);
+
+    // SCREEN: ui_subscreen_5
+    void ui_subscreen_5_init(void);
+    void ui_subscreen_5_destroy(void);
+
     extern lv_obj_t *ui_splash_screen; // splash screen object
     extern lv_obj_t *ui_main_screen;   // main screen object
+    extern lv_obj_t *ui_subscreen_1;   // subscreen 1 object
+    extern lv_obj_t *ui_subscreen_2;   // subscreen 2 object
+    extern lv_obj_t *ui_subscreen_3;   // subscreen 3 object
+    extern lv_obj_t *ui_subscreen_4;   // subscreen 4 object
+    extern lv_obj_t *ui_subscreen_5;   // subscreen 5 object
 
     extern lv_obj_t *ui____initial_actions0;
 
