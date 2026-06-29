@@ -54,7 +54,8 @@ extern "C"
 // COLORS
 #define UI_COLOR_BLACK lv_color_hex(0x000000)
 #define UI_COLOR_WHITE lv_color_hex(0xFFFFFF)
-#define UI_COLOR_LILA lv_color_hex(0x622181) // #622181
+#define UI_COLOR_LILA lv_color_hex(0x622181)       // #622181
+#define UI_COLOR_LIGHT_GRAY lv_color_hex(0xD3D3D3) // #D3D3D3
 
     // IMAGES AND IMAGE SETS
     LV_IMG_DECLARE(splash_screen);
