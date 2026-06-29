@@ -2,6 +2,7 @@
 
 lv_obj_t *ui_main_screen = NULL;
 
+static lv_obj_t *ui_menu_container = NULL; // container to hold the menu items
 static lv_obj_t *ui_label_debug = NULL;
 static lv_obj_t *ui_label_item = NULL; // label to display the selected menu item
 
@@ -18,6 +19,7 @@ static void menu_container_scroll_event_cb(lv_event_t *e);
 static void update_menu_state(lv_obj_t *container, bool update_label);
 
 static lv_obj_t *ui_selected_button = NULL; // the currently selected button in the menu container
+static uint32_t ui_selected_index = 0;
 
 /**
  * @brief Create and load the main screen
@@ -49,34 +51,34 @@ void ui_main_screen_init(void)
     lv_obj_set_style_text_font(ui_label_item, &lv_font_montserrat_24, 0);
 
     // -- create a container to hold the menu items and display as a card view --
-    lv_obj_t *menu_container = lv_obj_create(ui_main_screen);
+    ui_menu_container = lv_obj_create(ui_main_screen);
     lv_coord_t gap = 20;
     lv_coord_t item_w = (SCREEN_WIDTH - (gap * 4)) / 3; // 3 items + 4 gaps
     if (item_w < 60)
         item_w = 60;
 
     // ensure the first and last items are centered in the container by adding padding to the left and right
-    lv_obj_set_style_pad_left(menu_container, (SCREEN_WIDTH - item_w) / 2, 0);
-    lv_obj_set_style_pad_right(menu_container, (SCREEN_WIDTH - item_w) / 2, 0);
-    lv_obj_add_flag(menu_container, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
+    lv_obj_set_style_pad_left(ui_menu_container, (SCREEN_WIDTH - item_w) / 2, 0);
+    lv_obj_set_style_pad_right(ui_menu_container, (SCREEN_WIDTH - item_w) / 2, 0);
+    lv_obj_add_flag(ui_menu_container, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
 
     lv_coord_t item_h = item_w;
-    lv_obj_set_size(menu_container, SCREEN_WIDTH, item_h + 20);
-    lv_obj_set_style_bg_opa(menu_container, LV_OPA_TRANSP, 0);
-    lv_obj_set_style_border_width(menu_container, 0, 0);
+    lv_obj_set_size(ui_menu_container, SCREEN_WIDTH, item_h + 20);
+    lv_obj_set_style_bg_opa(ui_menu_container, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(ui_menu_container, 0, 0);
 
-    lv_obj_set_layout(menu_container, LV_LAYOUT_FLEX);
-    lv_obj_set_flex_flow(menu_container, LV_FLEX_FLOW_ROW);
-    lv_obj_set_scroll_dir(menu_container, LV_DIR_HOR);
-    lv_obj_set_scrollbar_mode(menu_container, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_set_scroll_snap_x(menu_container, LV_SCROLL_SNAP_CENTER);
-    lv_obj_add_flag(menu_container, LV_OBJ_FLAG_SCROLL_ONE);
-    lv_obj_set_style_pad_column(menu_container, gap, 0);
+    lv_obj_set_layout(ui_menu_container, LV_LAYOUT_FLEX);
+    lv_obj_set_flex_flow(ui_menu_container, LV_FLEX_FLOW_ROW);
+    lv_obj_set_scroll_dir(ui_menu_container, LV_DIR_HOR);
+    lv_obj_set_scrollbar_mode(ui_menu_container, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_scroll_snap_x(ui_menu_container, LV_SCROLL_SNAP_CENTER);
+    lv_obj_add_flag(ui_menu_container, LV_OBJ_FLAG_SCROLL_ONE);
+    lv_obj_set_style_pad_column(ui_menu_container, gap, 0);
 
     const uint32_t menu_count = sizeof(menu_icons) / sizeof(menu_icons[0]);
     for (uint32_t i = 0; i < menu_count; i++)
     {
-        lv_obj_t *button = lv_btn_create(menu_container);
+        lv_obj_t *button = lv_btn_create(ui_menu_container);
         lv_obj_set_size(button, item_w, item_h);
         lv_obj_set_style_bg_opa(button, LV_OPA_TRANSP, 0);
         lv_obj_set_style_border_width(button, 0, 0);
@@ -90,18 +92,49 @@ void ui_main_screen_init(void)
         lv_obj_add_event_cb(button, menu_item_event_cb, LV_EVENT_CLICKED, &menu_icons[i]);
     }
 
-    lv_obj_add_event_cb(menu_container, menu_container_scroll_event_cb, LV_EVENT_SCROLL, NULL);
-    lv_obj_add_event_cb(menu_container, menu_container_scroll_event_cb, LV_EVENT_SCROLL_END, NULL);
+    lv_obj_add_event_cb(ui_menu_container, menu_container_scroll_event_cb, LV_EVENT_SCROLL, NULL);
+    lv_obj_add_event_cb(ui_menu_container, menu_container_scroll_event_cb, LV_EVENT_SCROLL_END, NULL);
 
-    lv_obj_update_layout(menu_container);
-    update_menu_state(menu_container, true);
+    lv_obj_update_layout(ui_menu_container);
+    update_menu_state(ui_menu_container, true);
 
-    // lv_event_send(menu_container, LV_EVENT_SCROLL, NULL); // manually trigger a scroll event to ensure the first item is centered
+    // lv_event_send(ui_menu_container, LV_EVENT_SCROLL, NULL); // manually trigger a scroll event to ensure the first item is centered
 
     // -- create a label for debugging purposes --
     ui_label_debug = lv_label_create(ui_main_screen);
     lv_label_set_text(ui_label_debug, "Main Screen");
     lv_obj_align(ui_label_debug, LV_ALIGN_BOTTOM_MID, 0, -20);
+}
+
+/**
+ * @brief Scroll the main screen menu with the knob rotation
+ * @details each time the knob is rotated, the menu will scroll to the next or previous card item based on the direction of rotation
+ *
+ * @param dir Direction to scroll (positive for right, negative for left)
+ */
+void ui_main_screen_knob_rotate(int dir)
+{
+    if (ui_menu_container == NULL)
+        return;
+
+    lv_coord_t step = lv_obj_get_width(lv_obj_get_child(ui_menu_container, 0)) + lv_obj_get_style_pad_column(ui_menu_container, 0);
+
+    lv_coord_t current_x = lv_obj_get_scroll_x(ui_menu_container);
+    lv_coord_t target_x = current_x + (dir < 0 ? step : -step);
+
+    lv_obj_scroll_to_x(ui_menu_container, target_x, LV_ANIM_ON);
+}
+
+/**
+ * @brief Activate the currently selected menu item by knob press
+ * @details This function simulates a click event on the currently selected menu item when the knob is pressed.
+ */
+void ui_main_screen_knob_activate_selected(void)
+{
+    if (ui_selected_button == NULL)
+        return;
+
+    lv_event_send(ui_selected_button, LV_EVENT_CLICKED, NULL);
 }
 
 /**
@@ -248,6 +281,8 @@ static void update_menu_state(lv_obj_t *container, bool update_label)
             selected_idx = i; // store the index of the button that is closest to the center
         }
     }
+
+    ui_selected_index = selected_idx; // update the global selected index for knob operation
 
     lv_coord_t effect_range = lv_obj_get_width(container) / 2;
     if (effect_range < 1)

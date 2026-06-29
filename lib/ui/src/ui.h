@@ -70,6 +70,8 @@ extern "C"
 
     // SCREEN: ui_main_screen
     void ui_main_screen_init(void);
+    void ui_main_screen_knob_rotate(int dir);
+    void ui_main_screen_knob_activate_selected(void);
 
     // SCREEN: ui_subscreen_1
     void ui_subscreen_1_init(void);

@@ -32,15 +32,17 @@ lv_group_t *g;
  */
 void LVGL_knob_event(ui_knob_event_t event)
 {
+    if (lv_scr_act() != ui_main_screen)
+        return;
+
     if (event == UI_KNOB_LEFT)
     {
-        ESP_LOGI(TAG, "UI_KNOB_LEFT");
+        ui_main_screen_knob_rotate(-1);
     }
     else if (event == UI_KNOB_RIGHT)
     {
-        ESP_LOGI(TAG, "UI_KNOB_RIGHT");
+        ui_main_screen_knob_rotate(1);
     }
-
 }
 
 /**
@@ -50,9 +52,13 @@ void LVGL_knob_event(ui_knob_event_t event)
  */
 void LVGL_button_event(ui_button_event_t event)
 {
-    static uint8_t last_event = UI_BUTTON_PRESS_DOWN;
-    ESP_LOGI(TAG, "HF---Read  %d", event);
-   
+    if (lv_scr_act() != ui_main_screen)
+        return;
+
+    if (event == UI_BUTTON_SINGLE_CLICK)
+    {
+        ui_main_screen_knob_activate_selected();
+    }
 }
 
 
