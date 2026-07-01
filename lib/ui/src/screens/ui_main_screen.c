@@ -1,25 +1,25 @@
 #include "../ui.h"
 
 lv_obj_t *ui_main_screen = NULL;
+lv_obj_t *ui_main_menu_selected_btn = NULL; // the currently selected button in the menu container
+uint32_t ui_main_menu_selected_btn_index = 0;  // the index of the currently selected button in the menu container
+
+ui_icon_t main_menu_icons[] = {
+    {&lower_jaw_64x64, "Lower Jaw", 0},
+    {&upper_jaw_64x64, "Upper Jaw", 1},
+    {&multcase_tray_64x64, "Multcase Tray", 2},
+    {&universal_scan_64x64, "Universal Scan", 3},
+    {&correction_scan_64x64, "Correction Scan", 4},
+};
 
 static lv_obj_t *ui_menu_container = NULL; // container to hold the menu items
 static lv_obj_t *ui_label_debug = NULL;
 static lv_obj_t *ui_label_item = NULL; // label to display the selected menu item
 
-ui_icon_t menu_icons[] = {
-    {&lower_jaw_64x64, "Lower Jaw", 1},
-    {&upper_jaw_64x64, "Upper Jaw", 2},
-    {&multcase_tray_64x64, "Multcase Tray", 3},
-    {&universal_scan_64x64, "Universal Scan", 4},
-    {&correction_scan_64x64, "Correction Scan", 5},
-};
-
 static void menu_icon_click_event_cb(lv_event_t *e);
 static void menu_container_scroll_event_cb(lv_event_t *e);
 static void update_menu_state(lv_obj_t *container, bool update_btn_style, bool update_label);
 
-static lv_obj_t *ui_selected_button = NULL; // the currently selected button in the menu container
-static uint32_t ui_selected_btn_index = 0;  // the index of the currently selected button in the menu container
 
 /**
  * @brief Create and load the main screen
@@ -73,7 +73,7 @@ void ui_main_screen_init(void)
     lv_obj_add_flag(ui_menu_container, LV_OBJ_FLAG_SCROLL_ONE);
     lv_obj_set_style_pad_column(ui_menu_container, gap, 0);
 
-    const uint32_t menu_items_cnt = sizeof(menu_icons) / sizeof(menu_icons[0]);
+    const uint32_t menu_items_cnt = sizeof(main_menu_icons) / sizeof(main_menu_icons[0]);
     for (uint32_t i = 0; i < menu_items_cnt; i++)
     {
         lv_obj_t *button = lv_btn_create(ui_menu_container);
@@ -84,10 +84,10 @@ void ui_main_screen_init(void)
         lv_obj_add_flag(button, LV_OBJ_FLAG_SCROLL_ON_FOCUS); // Ensure the button scrolls into view when focused
 
         lv_obj_t *img = lv_img_create(button); // place image on the button
-        lv_img_set_src(img, menu_icons[i].image);
+        lv_img_set_src(img, main_menu_icons[i].image);
         lv_obj_center(img);
 
-        lv_obj_add_event_cb(button, menu_icon_click_event_cb, LV_EVENT_CLICKED, &menu_icons[i]);
+        lv_obj_add_event_cb(button, menu_icon_click_event_cb, LV_EVENT_CLICKED, &main_menu_icons[i]);
     }
 
     lv_obj_add_event_cb(ui_menu_container, menu_container_scroll_event_cb, LV_EVENT_SCROLL, NULL);
@@ -102,6 +102,16 @@ void ui_main_screen_init(void)
     ui_label_debug = lv_label_create(ui_main_screen);
     lv_label_set_text(ui_label_debug, "Main Screen");
     lv_obj_align(ui_label_debug, LV_ALIGN_BOTTOM_MID, 0, -20);
+}
+
+/**
+ * @brief Get the index of the currently selected menu item
+ * 
+ * @return uint8_t 
+ */
+uint8_t ui_main_screen_get_icon_id(void)
+{
+    return ui_main_menu_selected_btn_index;
 }
 
 /**
@@ -130,10 +140,10 @@ void ui_main_screen_knob_rotate(int dir)
  */
 void ui_main_screen_knob_activate_selected(void)
 {
-    if (ui_selected_button == NULL)
+    if (ui_main_menu_selected_btn == NULL)
         return;
 
-    lv_event_send(ui_selected_button, LV_EVENT_CLICKED, NULL);
+    lv_event_send(ui_main_menu_selected_btn, LV_EVENT_CLICKED, NULL);
 }
 
 /**
@@ -144,7 +154,7 @@ void ui_main_screen_knob_activate_selected(void)
 static void menu_icon_click_event_cb(lv_event_t *e)
 {
     lv_obj_t *target = lv_event_get_target(e);
-    if (target != ui_selected_button)
+    if (target != ui_main_menu_selected_btn)
         return;
 
     if (lv_event_get_code(e) != LV_EVENT_CLICKED)
@@ -154,36 +164,8 @@ static void menu_icon_click_event_cb(lv_event_t *e)
     if (!icon)
         return;
 
-    switch (icon->id)
-    {
-    case 1:
-        // go to ui_subscreen_1
-        ui_subscreen_1_init();
-        lv_disp_load_scr(ui_subscreen_1);
-        break;
-    case 2:
-        // go to ui_subscreen_2
-        ui_subscreen_2_init();
-        lv_disp_load_scr(ui_subscreen_2);
-        break;
-    case 3:
-        // go to ui_subscreen_3
-        ui_subscreen_3_init();
-        lv_disp_load_scr(ui_subscreen_3);
-        break;
-    case 4:
-        // go to ui_subscreen_4
-        ui_subscreen_4_init();
-        lv_disp_load_scr(ui_subscreen_4);
-        break;
-    case 5:
-        // go to ui_subscreen_5
-        ui_subscreen_5_init();
-        lv_disp_load_scr(ui_subscreen_5);
-        break;
-    default:
-        break;
-    }
+    ui_conf_screen_init(icon->id);
+    lv_disp_load_scr(ui_conf_screen);
 }
 
 /**
@@ -248,7 +230,7 @@ static void update_menu_state(lv_obj_t *container, bool update_btn_style, bool u
         {
             best_dist = dist;
             selected_btn_idx = i;
-            ui_selected_button = btn;
+            ui_main_menu_selected_btn = btn;
         }
 
         if (dist > effect_range)
@@ -259,10 +241,10 @@ static void update_menu_state(lv_obj_t *container, bool update_btn_style, bool u
     }
 
     // enable only selected
-    if (ui_selected_button)
-        lv_obj_add_flag(ui_selected_button, LV_OBJ_FLAG_CLICKABLE);
+    if (ui_main_menu_selected_btn)
+        lv_obj_add_flag(ui_main_menu_selected_btn, LV_OBJ_FLAG_CLICKABLE);
 
-    ui_selected_btn_index = selected_btn_idx;
+    ui_main_menu_selected_btn_index = selected_btn_idx;
 
     if (update_btn_style)
     {
@@ -287,5 +269,5 @@ static void update_menu_state(lv_obj_t *container, bool update_btn_style, bool u
     }
 
     if (update_label && ui_label_item != NULL)
-        lv_label_set_text(ui_label_item, menu_icons[selected_btn_idx].text);
+        lv_label_set_text(ui_label_item, main_menu_icons[selected_btn_idx].text);
 }

@@ -51,6 +51,9 @@ extern "C"
 #define SCREEN_WIDTH 480
 #define SCREEN_HEIGHT 480
 
+#define SCREEN_CENTER_X (SCREEN_WIDTH / 2)
+#define SCREEN_CENTER_Y (SCREEN_HEIGHT / 2)
+
 // COLORS
 #define UI_COLOR_BLACK lv_color_hex(0x000000)
 #define UI_COLOR_WHITE lv_color_hex(0xFFFFFF)
@@ -65,12 +68,22 @@ extern "C"
     LV_IMG_DECLARE(multcase_tray_64x64);
     LV_IMG_DECLARE(universal_scan_64x64);
     LV_IMG_DECLARE(correction_scan_64x64);
+    LV_IMG_DECLARE(busy);
+    LV_IMG_DECLARE(back);
+    LV_IMG_DECLARE(start_scan);
+    LV_IMG_DECLARE(play);
+    LV_IMG_DECLARE(hr_on);
+    LV_IMG_DECLARE(hr_off);
+    LV_IMG_DECLARE(enhanced_global_scan_on);
+    LV_IMG_DECLARE(enhanced_global_scan_off);
+    LV_IMG_DECLARE(service_position);
 
     // SCREEN: ui_splash_screen
     void ui_splash_screen_init(void);
 
     // SCREEN: ui_main_screen
     void ui_main_screen_init(void);
+    uint8_t ui_main_screen_get_icon_id(void);
     void ui_main_screen_knob_rotate(int dir);
     void ui_main_screen_knob_activate_selected(void);
 
@@ -94,13 +107,21 @@ extern "C"
     void ui_subscreen_5_init(void);
     void ui_subscreen_5_destroy(void);
 
-    extern lv_obj_t *ui_splash_screen; // splash screen object
-    extern lv_obj_t *ui_main_screen;   // main screen object
-    extern lv_obj_t *ui_subscreen_1;   // subscreen 1 object
-    extern lv_obj_t *ui_subscreen_2;   // subscreen 2 object
-    extern lv_obj_t *ui_subscreen_3;   // subscreen 3 object
-    extern lv_obj_t *ui_subscreen_4;   // subscreen 4 object
-    extern lv_obj_t *ui_subscreen_5;   // subscreen 5 object
+    // SCREEN: ui_conf_screen
+    void ui_conf_screen_init(uint8_t main_menu_icon_id);
+    void ui_conf_screen_destroy(void);
+
+    extern lv_obj_t *ui_splash_screen;               // splash screen object
+    extern lv_obj_t *ui_main_screen;                 // main screen object
+    extern lv_obj_t *ui_main_menu_selected_btn;      // the currently selected button in the menu container
+    extern uint32_t ui_main_menu_selected_btn_index; // the index of the currently selected button in the menu container
+    extern ui_icon_t main_menu_icons[];              // array of main menu icons
+    extern lv_obj_t *ui_subscreen_1;                 // subscreen 1 object
+    extern lv_obj_t *ui_subscreen_2;                 // subscreen 2 object
+    extern lv_obj_t *ui_subscreen_3;                 // subscreen 3 object
+    extern lv_obj_t *ui_subscreen_4;                 // subscreen 4 object
+    extern lv_obj_t *ui_subscreen_5;                 // subscreen 5 object
+    extern lv_obj_t *ui_conf_screen;                 // configuration screen object
 
     extern lv_obj_t *ui____initial_actions0;
 
