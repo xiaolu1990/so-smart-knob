@@ -80,7 +80,7 @@
  *====================*/
 
 /*Default display refresh period. LVG will redraw changed areas with this period time*/
-#define LV_DISP_DEF_REFR_PERIOD 30      /*[ms]*/
+#define LV_DISP_DEF_REFR_PERIOD 20      /*[ms]*/
 
 /*Input device read period in milliseconds*/
 #define LV_INDEV_DEF_READ_PERIOD 30     /*[ms]*/
@@ -232,7 +232,7 @@
  *-----------*/
 
 /*Enable the log module*/
-#define LV_USE_LOG 1
+#define LV_USE_LOG 0
 #if LV_USE_LOG
 
     /*How important log should be added:
@@ -283,7 +283,7 @@
 /*1: Show CPU usage and FPS count*/
 #define LV_USE_PERF_MONITOR 1
 #if LV_USE_PERF_MONITOR
-    #define LV_USE_PERF_MONITOR_POS LV_ALIGN_BOTTOM_RIGHT
+    #define LV_USE_PERF_MONITOR_POS LV_ALIGN_BOTTOM_MID
 #endif
 
 /*1: Show the used memory and the memory fragmentation
@@ -779,6 +779,13 @@
     #define LV_DEMO_MUSIC_AUTO_PLAY 1
 #endif
 
+/*==================
+* EXTRAS
+*==================*/
+/* The time it takes (in milliseconds) to smoothly snap or scroll to an object.
+ * Lower value = snappier, faster transitions.
+ * Higher value = slower, smoother, more cinematic glide. */
+#define LV_ANIM_TIME_DEFAULT   200  // Default is usually 200ms
 /*--END OF LV_CONF_H--*/
 
 #endif /*LV_CONF_H*/

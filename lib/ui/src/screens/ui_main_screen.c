@@ -14,12 +14,12 @@ ui_icon_t menu_icons[] = {
     {&correction_scan_64x64, "Correction Scan", 5},
 };
 
-static void menu_item_event_cb(lv_event_t *e);
+static void menu_icon_click_event_cb(lv_event_t *e);
 static void menu_container_scroll_event_cb(lv_event_t *e);
-static void update_menu_state(lv_obj_t *container, bool update_label);
+static void update_menu_state(lv_obj_t *container, bool update_btn_style, bool update_label);
 
 static lv_obj_t *ui_selected_button = NULL; // the currently selected button in the menu container
-static uint32_t ui_selected_index = 0;
+static uint32_t ui_selected_btn_index = 0;  // the index of the currently selected button in the menu container
 
 /**
  * @brief Create and load the main screen
@@ -48,14 +48,12 @@ void ui_main_screen_init(void)
 
     // -- setup the item label to display the selected menu item --
     ui_label_item = lv_label_create(ui_main_screen);
-    lv_obj_set_style_text_font(ui_label_item, &lv_font_montserrat_24, 0);
+    lv_obj_set_style_text_font(ui_label_item, &lv_font_montserrat_30, 0);
 
     // -- create a container to hold the menu items and display as a card view --
     ui_menu_container = lv_obj_create(ui_main_screen);
-    lv_coord_t gap = 20;
+    lv_coord_t gap = 21;
     lv_coord_t item_w = (SCREEN_WIDTH - (gap * 4)) / 3; // 3 items + 4 gaps
-    if (item_w < 60)
-        item_w = 60;
 
     // ensure the first and last items are centered in the container by adding padding to the left and right
     lv_obj_set_style_pad_left(ui_menu_container, (SCREEN_WIDTH - item_w) / 2, 0);
@@ -75,8 +73,8 @@ void ui_main_screen_init(void)
     lv_obj_add_flag(ui_menu_container, LV_OBJ_FLAG_SCROLL_ONE);
     lv_obj_set_style_pad_column(ui_menu_container, gap, 0);
 
-    const uint32_t menu_count = sizeof(menu_icons) / sizeof(menu_icons[0]);
-    for (uint32_t i = 0; i < menu_count; i++)
+    const uint32_t menu_items_cnt = sizeof(menu_icons) / sizeof(menu_icons[0]);
+    for (uint32_t i = 0; i < menu_items_cnt; i++)
     {
         lv_obj_t *button = lv_btn_create(ui_menu_container);
         lv_obj_set_size(button, item_w, item_h);
@@ -89,14 +87,14 @@ void ui_main_screen_init(void)
         lv_img_set_src(img, menu_icons[i].image);
         lv_obj_center(img);
 
-        lv_obj_add_event_cb(button, menu_item_event_cb, LV_EVENT_CLICKED, &menu_icons[i]);
+        lv_obj_add_event_cb(button, menu_icon_click_event_cb, LV_EVENT_CLICKED, &menu_icons[i]);
     }
 
     lv_obj_add_event_cb(ui_menu_container, menu_container_scroll_event_cb, LV_EVENT_SCROLL, NULL);
     lv_obj_add_event_cb(ui_menu_container, menu_container_scroll_event_cb, LV_EVENT_SCROLL_END, NULL);
 
     lv_obj_update_layout(ui_menu_container);
-    update_menu_state(ui_menu_container, true);
+    update_menu_state(ui_menu_container, true, true);
 
     // lv_event_send(ui_menu_container, LV_EVENT_SCROLL, NULL); // manually trigger a scroll event to ensure the first item is centered
 
@@ -122,7 +120,8 @@ void ui_main_screen_knob_rotate(int dir)
     lv_coord_t current_x = lv_obj_get_scroll_x(ui_menu_container);
     lv_coord_t target_x = current_x + (dir < 0 ? step : -step);
 
-    lv_obj_scroll_to_x(ui_menu_container, target_x, LV_ANIM_ON);
+    // lv_obj_scroll_to_x(ui_menu_container, target_x, LV_ANIM_ON);
+    lv_obj_scroll_to_x(ui_menu_container, target_x, LV_ANIM_OFF);
 }
 
 /**
@@ -138,11 +137,11 @@ void ui_main_screen_knob_activate_selected(void)
 }
 
 /**
- * @brief Menu item event callback
+ * @brief Callback function when menu icon is clicked
  *
  * @param e
  */
-static void menu_item_event_cb(lv_event_t *e)
+static void menu_icon_click_event_cb(lv_event_t *e)
 {
     lv_obj_t *target = lv_event_get_target(e);
     if (target != ui_selected_button)
@@ -200,56 +199,23 @@ static void menu_container_scroll_event_cb(lv_event_t *e)
 
     if (code == LV_EVENT_SCROLL)
     {
-        update_menu_state(container, false); // 只更新缩放和透明度
+        update_menu_state(container, false, true);
     }
     else if (code == LV_EVENT_SCROLL_END)
     {
-        update_menu_state(container, true); // 滚动结束后更新文字
+        update_menu_state(container, true, true);
     }
 }
-// static void menu_container_scroll_event_cb(lv_event_t *e)
-// {
-//     if (lv_event_get_code(e) != LV_EVENT_SCROLL)
-//         return;
-
-//     lv_obj_t *container = lv_event_get_target(e);
-//     uint32_t child_cnt = lv_obj_get_child_cnt(container);
-
-//     // check if there are children and the label is valid
-//     if (child_cnt == 0 || ui_label_item == NULL)
-//         return;
-
-//     lv_coord_t center_x = lv_obj_get_width(container) / 2; // center x position of the container
-//     lv_coord_t scroll_x = lv_obj_get_scroll_x(container);  // current scroll x position of the container
-
-//     uint32_t best_idx = 0;
-//     lv_coord_t best_dist = LV_COORD_MAX;
-
-//     for (uint32_t i = 0; i < child_cnt; i++)
-//     {
-//         lv_obj_t *btn = lv_obj_get_child(container, i);
-//         lv_coord_t btn_center_x = lv_obj_get_x(btn) - scroll_x + lv_obj_get_width(btn) / 2; // calculate the center x position of the button relative to the container's scroll position
-//         lv_coord_t dist = LV_ABS(btn_center_x - center_x);                                  // distance from the button's center to the container's center
-
-//         if (dist < best_dist) // find the button that is closest to the center of the container
-//         {
-//             best_dist = dist;
-//             best_idx = i;
-//         }
-//     }
-
-//     // update the label with the text of the centered menu item
-//     lv_label_set_text(ui_label_item, menu_icons[best_idx].text);
-// }
 
 /**
  * @brief Update the menu state
  * @details - update the zoom, opacity, and label of the menu items based on their distance from the center
  *
  * @param container The menu container
+ * @param update_btn_style Whether to update the style of the buttons
  * @param update_label Whether to update the label of the centered item
  */
-static void update_menu_state(lv_obj_t *container, bool update_label)
+static void update_menu_state(lv_obj_t *container, bool update_btn_style, bool update_label)
 {
     if (container == NULL)
         return;
@@ -262,10 +228,13 @@ static void update_menu_state(lv_obj_t *container, bool update_label)
     lv_obj_get_coords(container, &cont_area);
     lv_coord_t container_center_x = (cont_area.x1 + cont_area.x2) / 2;
 
-    uint32_t selected_idx = 0;
+    lv_coord_t effect_range = lv_obj_get_width(container) / 2;
+    if (effect_range < 1)
+        effect_range = 1;
+
+    uint32_t selected_btn_idx = 0;
     lv_coord_t best_dist = LV_COORD_MAX;
 
-    // Find the button that is closest to the center of the container
     for (uint32_t i = 0; i < child_cnt; i++)
     {
         lv_obj_t *btn = lv_obj_get_child(container, i);
@@ -278,56 +247,45 @@ static void update_menu_state(lv_obj_t *container, bool update_label)
         if (dist < best_dist)
         {
             best_dist = dist;
-            selected_idx = i; // store the index of the button that is closest to the center
-        }
-    }
-
-    ui_selected_index = selected_idx; // update the global selected index for knob operation
-
-    lv_coord_t effect_range = lv_obj_get_width(container) / 2;
-    if (effect_range < 1)
-        effect_range = 1;
-
-    // Update the zoom and opacity of each button based on its distance from the center
-    for (uint32_t i = 0; i < child_cnt; i++)
-    {
-        lv_obj_t *btn = lv_obj_get_child(container, i);
-
-        // Make the selected button clickable and others not clickable
-        if (i == selected_idx)
-        {
+            selected_btn_idx = i;
             ui_selected_button = btn;
-            lv_obj_add_flag(btn, LV_OBJ_FLAG_CLICKABLE);
-        }
-        else
-        {
-            lv_obj_clear_flag(btn, LV_OBJ_FLAG_CLICKABLE);
         }
 
-        lv_area_t btn_area;
-        lv_obj_get_coords(btn, &btn_area);
-        lv_coord_t btn_center_x = (btn_area.x1 + btn_area.x2) / 2;
-
-        lv_coord_t dist = LV_ABS(btn_center_x - container_center_x);
         if (dist > effect_range)
             dist = effect_range;
 
-        uint16_t zoom_min = 180; // minimum zoom level (0.7x)
-        uint16_t zoom_max = 360; // maximum zoom level (1.4x)
-        uint16_t zoom = zoom_min + (uint16_t)((effect_range - dist) * (zoom_max - zoom_min) / effect_range);
+        // disable all buttons click property first
+        lv_obj_clear_flag(btn, LV_OBJ_FLAG_CLICKABLE);
+    }
 
-        lv_opa_t opa_min = LV_OPA_20;
-        lv_opa_t opa_max = LV_OPA_COVER;
-        lv_opa_t opa = opa_min + (lv_opa_t)((effect_range - dist) * (opa_max - opa_min) / effect_range);
+    // enable only selected
+    if (ui_selected_button)
+        lv_obj_add_flag(ui_selected_button, LV_OBJ_FLAG_CLICKABLE);
 
-        lv_obj_set_style_transform_zoom(btn, zoom, 0);
-        lv_obj_set_style_transform_pivot_x(btn, lv_obj_get_width(btn) / 2, 0);
-        lv_obj_set_style_transform_pivot_y(btn, lv_obj_get_height(btn) / 2, 0);
-        lv_obj_set_style_opa(btn, opa, 0);
+    ui_selected_btn_index = selected_btn_idx;
+
+    if (update_btn_style)
+    {
+        for (uint32_t i = 0; i < child_cnt; i++)
+        {
+            lv_obj_t *btn = lv_obj_get_child(container, i);
+            lv_obj_set_style_transform_pivot_x(btn, lv_obj_get_width(btn) / 2, 0);
+            lv_obj_set_style_transform_pivot_y(btn, lv_obj_get_height(btn) / 2, 0);
+            if (i == selected_btn_idx)
+            {
+                // apply zoom and opacity styles for the selected button
+                lv_obj_set_style_transform_zoom(btn, 384, 0); // 1.5x zoom
+                lv_obj_set_style_opa(btn, LV_OPA_COVER, 0);         // full opacity
+            }
+            else
+            {
+                // reset the style for non-selected buttons
+                lv_obj_set_style_transform_zoom(btn, 220, 0); // 0.85x zoom
+                lv_obj_set_style_opa(btn, LV_OPA_50, 0);      // reset opacity to low
+            }
+        }
     }
 
     if (update_label && ui_label_item != NULL)
-    {
-        lv_label_set_text(ui_label_item, menu_icons[selected_idx].text);
-    }
+        lv_label_set_text(ui_label_item, menu_icons[selected_btn_idx].text);
 }
