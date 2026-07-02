@@ -111,17 +111,28 @@ extern "C"
     void ui_conf_screen_init(uint8_t main_menu_icon_id);
     void ui_conf_screen_destroy(void);
 
+    // SCREEN: ui_scan_screen
+    void ui_scan_screen_init(uint8_t main_menu_icon_id);
+    void ui_scan_screen_destroy(void);
+
     extern lv_obj_t *ui_splash_screen;               // splash screen object
+    
     extern lv_obj_t *ui_main_screen;                 // main screen object
     extern lv_obj_t *ui_main_menu_selected_btn;      // the currently selected button in the menu container
     extern uint32_t ui_main_menu_selected_btn_index; // the index of the currently selected button in the menu container
     extern ui_icon_t main_menu_icons[];              // array of main menu icons
+    
     extern lv_obj_t *ui_subscreen_1;                 // subscreen 1 object
     extern lv_obj_t *ui_subscreen_2;                 // subscreen 2 object
     extern lv_obj_t *ui_subscreen_3;                 // subscreen 3 object
     extern lv_obj_t *ui_subscreen_4;                 // subscreen 4 object
     extern lv_obj_t *ui_subscreen_5;                 // subscreen 5 object
+    
     extern lv_obj_t *ui_conf_screen;                 // configuration screen object
+    extern bool state_enable_hr;                     // default state for HR icon, true=ON, false=OFF
+    extern bool state_egs;                           // default state for Enhanced Global Scan icon, true=ON, false=OFF
+    
+    extern lv_obj_t *ui_scan_screen;                 // scan screen object
 
     extern lv_obj_t *ui____initial_actions0;
 

@@ -3,6 +3,8 @@
 #include <math.h>
 
 lv_obj_t *ui_conf_screen = NULL;
+bool state_enable_hr = true; // default state for HR icon, true=ON, false=OFF
+bool state_egs = true; // default state for Enhanced Global Scan icon, true=ON, false=OFF
 
 static lv_obj_t *ui_label_debug = NULL;
 
@@ -107,20 +109,41 @@ static void menu_icon_click_event_cb(lv_event_t *e)
     {
         switch (icon->id)
         {
-        case 1:
+        case 0:
             // Handle HR ON action
+            state_enable_hr = !state_enable_hr; // toggle HR state
+            lv_obj_t *img_hr = lv_obj_get_child(target, 0); // get the image child of the button
+            if (img_hr != NULL)
+            {
+                lv_img_set_src(img_hr, state_enable_hr ? &hr_on : &hr_off); // update the image based on the new state
+            }
+            break;
+        case 1:
+            // Handle Enhanced Global Scan ON action
+            state_egs = !state_egs; // toggle Enhanced Global Scan state
+            lv_obj_t *img_egs = lv_obj_get_child(target, 0); // get the image child of the button
+            if (img_egs != NULL)   
+            {
+                lv_img_set_src(img_egs, state_egs ? &enhanced_global_scan_on : &enhanced_global_scan_off); // update the image based on the new state
+            }
             break;
         case 2:
-            // Handle HR OFF action
+            // Handle Service Position action
             break;
         case 3:
-            // Handle Service Position action
+            // Handle Start Scan action
+            if (ui_scan_screen == NULL)
+                ui_scan_screen_init(ui_main_menu_selected_btn_index);
+
+            lv_disp_load_scr(ui_scan_screen);
+            // Clean up the configuration screen to free memory
+            ui_conf_screen_destroy();
             break;
         case 4:
             // Handle back icon action, return to main screen
             if (ui_main_screen == NULL)
                 ui_main_screen_init();
-                
+
             lv_disp_load_scr(ui_main_screen);
             // Clean up the configuration screen to free memory
             ui_conf_screen_destroy();
