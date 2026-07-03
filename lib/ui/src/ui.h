@@ -133,6 +133,7 @@ extern "C"
     extern bool state_egs;                           // default state for Enhanced Global Scan icon, true=ON, false=OFF
     
     extern lv_obj_t *ui_scan_screen;                 // scan screen object
+    extern bool state_scan_in_progress;              // default state for scanning, false=not scanning, true=scanning
 
     extern lv_obj_t *ui____initial_actions0;
 
