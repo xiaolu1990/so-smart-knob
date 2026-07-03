@@ -1,9 +1,3 @@
-/*
- * SPDX-FileCopyrightText: 2024-2025 Espressif Systems (Shanghai) CO LTD
- *
- * SPDX-License-Identifier: CC0-1.0
- */
-
 #include <Arduino.h>
 #include <esp_display_panel.hpp>
 #include <lvgl.h>
@@ -20,12 +14,15 @@
 // #include <demos/lv_demos.h>
 // #include <examples/lv_examples.h>
 
-#define GPIO_NUM_KNOB_PIN_A     6
-#define GPIO_NUM_KNOB_PIN_B     5
-#define GPIO_BUTTON_PIN         GPIO_NUM_0
+#define GPIO_NUM_KNOB_PIN_A 6
+#define GPIO_NUM_KNOB_PIN_B 5
+#define GPIO_BUTTON_PIN GPIO_NUM_0
 
 using namespace esp_panel::drivers;
 using namespace esp_panel::board;
+
+lv_timer_t *screen_sleep_timer = NULL; // Timer to check for sleep timeout
+bool is_sleeping = false;
 
 /*Knob event definition*/
 ESP_Knob *knob;
@@ -33,6 +30,7 @@ static void knob_left_event_cb(int count, void *usr_data)
 {
     // Serial.printf("Detect left event, count is %d\n", count);
     lvgl_port_lock(-1);
+    lv_disp_trig_activity(NULL); // Manually trigger LVGL activity to reset the inactivity timer
     LVGL_knob_event(UI_KNOB_LEFT);
     lvgl_port_unlock();
 }
@@ -41,11 +39,13 @@ static void knob_right_event_cb(int count, void *usr_data)
 {
     // Serial.printf("Detect right event, count is %d\n", count);
     lvgl_port_lock(-1);
+    lv_disp_trig_activity(NULL); // Manually trigger LVGL activity to reset the inactivity timer
     LVGL_knob_event(UI_KNOB_RIGHT);
     lvgl_port_unlock();
 }
 
-static void single_click_event_cb(void *button_handle, void *usr_data) {
+static void single_click_event_cb(void *button_handle, void *usr_data)
+{
     // Serial.println("Button Single Click");
     lvgl_port_lock(-1);
     LVGL_button_event(UI_BUTTON_SINGLE_CLICK);
@@ -60,11 +60,28 @@ static void double_click_event_cb(void *button_handle, void *usr_data)
     lvgl_port_unlock();
 }
 
-static void long_press_event_cb(void *button_handle, void *usr_data) {
+static void long_press_event_cb(void *button_handle, void *usr_data)
+{
     // Serial.println("Button Long Press Start");
     lvgl_port_lock(-1);
     LVGL_button_event(UI_BUTTON_LONG_PRESS_START);
     lvgl_port_unlock();
+}
+
+static void check_sleep_timeout_cb(lv_timer_t *timer)
+{
+    // Get inactive time of the default display
+    uint32_t inactive_time = lv_disp_get_inactive_time(NULL);
+
+    if (state_scan_in_progress)
+    {
+        return;
+    }
+
+    if (!is_sleeping && (inactive_time >= SLEEP_TIMEOUT_MS))
+    {
+        ui_sleep_screen_enter();
+    }
 }
 
 void setup()
@@ -85,7 +102,8 @@ void setup()
      * "bounce buffer" functionality to enhance the RGB data bandwidth.
      * This feature will consume `bounce_buffer_size * bytes_per_pixel * 2` of SRAM memory.
      */
-    if (lcd_bus->getBasicAttributes().type == ESP_PANEL_BUS_TYPE_RGB) {
+    if (lcd_bus->getBasicAttributes().type == ESP_PANEL_BUS_TYPE_RGB)
+    {
         static_cast<BusRGB *>(lcd_bus)->configRGB_BounceBufferSize(lcd->getFrameWidth() * 10);
     }
 #endif
@@ -114,12 +132,15 @@ void setup()
 
     ui_init();
 
+    screen_sleep_timer = lv_timer_create(check_sleep_timeout_cb, 200, NULL); // register a timer to check for sleep timeout every 200ms
+
     /* Release the mutex */
     lvgl_port_unlock();
 }
 
 void loop()
 {
-    Serial.println("IDLE loop");
-    delay(1000);
+    lv_timer_handler();
+    delay(5);
 }
+

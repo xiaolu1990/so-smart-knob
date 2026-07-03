@@ -54,6 +54,9 @@ extern "C"
 #define SCREEN_CENTER_X (SCREEN_WIDTH / 2)
 #define SCREEN_CENTER_Y (SCREEN_HEIGHT / 2)
 
+// GENERAL SETTINGS
+#define SLEEP_TIMEOUT_MS 10000 // go to sleep after 10 seconds of inactivity
+
 // COLORS
 #define UI_COLOR_BLACK lv_color_hex(0x000000)
 #define UI_COLOR_WHITE lv_color_hex(0xFFFFFF)
@@ -81,61 +84,46 @@ extern "C"
     // SCREEN: ui_splash_screen
     void ui_splash_screen_init(void);
 
+    extern lv_obj_t *ui_splash_screen; // splash screen object
+
     // SCREEN: ui_main_screen
     void ui_main_screen_init(void);
     uint8_t ui_main_screen_get_icon_id(void);
     void ui_main_screen_knob_rotate(int dir);
     void ui_main_screen_knob_activate_selected(void);
 
-    // SCREEN: ui_subscreen_1
-    void ui_subscreen_1_init(void);
-    void ui_subscreen_1_destroy(void);
-
-    // SCREEN: ui_subscreen_2
-    void ui_subscreen_2_init(void);
-    void ui_subscreen_2_destroy(void);
-
-    // SCREEN: ui_subscreen_3
-    void ui_subscreen_3_init(void);
-    void ui_subscreen_3_destroy(void);
-
-    // SCREEN: ui_subscreen_4
-    void ui_subscreen_4_init(void);
-    void ui_subscreen_4_destroy(void);
-
-    // SCREEN: ui_subscreen_5
-    void ui_subscreen_5_init(void);
-    void ui_subscreen_5_destroy(void);
+    extern lv_obj_t *ui_main_screen;                 // main screen object
+    extern lv_obj_t *ui_main_menu_selected_btn;      // the currently selected button in the menu container
+    extern uint32_t ui_main_menu_selected_btn_index; // the index of the currently selected button in the menu container
+    extern ui_icon_t main_menu_icons[];              // array of main menu icons
 
     // SCREEN: ui_conf_screen
     void ui_conf_screen_init(uint8_t main_menu_icon_id);
     void ui_conf_screen_destroy(void);
 
+    extern lv_obj_t *ui_conf_screen; // configuration screen object
+    extern bool state_enable_hr;     // default state for HR icon, true=ON, false=OFF
+    extern bool state_egs;           // default state for Enhanced Global Scan icon, true=ON, false=OFF
+
     // SCREEN: ui_scan_screen
     void ui_scan_screen_init(uint8_t main_menu_icon_id);
     void ui_scan_screen_destroy(void);
 
-    extern lv_obj_t *ui_splash_screen;               // splash screen object
-    
-    extern lv_obj_t *ui_main_screen;                 // main screen object
-    extern lv_obj_t *ui_main_menu_selected_btn;      // the currently selected button in the menu container
-    extern uint32_t ui_main_menu_selected_btn_index; // the index of the currently selected button in the menu container
-    extern ui_icon_t main_menu_icons[];              // array of main menu icons
-    
-    extern lv_obj_t *ui_subscreen_1;                 // subscreen 1 object
-    extern lv_obj_t *ui_subscreen_2;                 // subscreen 2 object
-    extern lv_obj_t *ui_subscreen_3;                 // subscreen 3 object
-    extern lv_obj_t *ui_subscreen_4;                 // subscreen 4 object
-    extern lv_obj_t *ui_subscreen_5;                 // subscreen 5 object
-    
-    extern lv_obj_t *ui_conf_screen;                 // configuration screen object
-    extern bool state_enable_hr;                     // default state for HR icon, true=ON, false=OFF
-    extern bool state_egs;                           // default state for Enhanced Global Scan icon, true=ON, false=OFF
-    
-    extern lv_obj_t *ui_scan_screen;                 // scan screen object
-    extern bool state_scan_in_progress;              // default state for scanning, false=not scanning, true=scanning
+    extern lv_obj_t *ui_scan_screen;    // scan screen object
+    extern bool state_scan_in_progress; // default state for scanning, false=not scanning, true=scanning
 
-    extern lv_obj_t *ui____initial_actions0;
+    // SCREEN: ui_sleep_screen
+    void ui_sleep_screen_init(void);
+    void ui_sleep_screen_destroy(void);
+    void ui_sleep_screen_enter(void);
+    void ui_sleep_screen_wakeup(lv_event_t *e);
+    void ui_sleep_screen_knob_rotate(void);
+
+    extern lv_obj_t *ui_sleep_screen; // sleep screen object
+
+    extern bool is_sleeping;               // flag to indicate if the device is in sleep mode
+    extern lv_timer_t *screen_sleep_timer; // Timer to check for sleep timeout
+    extern lv_obj_t *ui_initial_actions;
 
     // Function declarations in ui.c
     void LVGL_knob_event(ui_knob_event_t event);
