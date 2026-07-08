@@ -79,6 +79,10 @@ void ui_sleep_screen_wakeup(lv_event_t *e)
     ui_sleep_screen_destroy(); // Destroy the sleep screen to free up resources
 }
 
+/**
+ * @brief Handle knob rotation event on the sleep screen
+ *
+ */
 void ui_sleep_screen_knob_rotate(void)
 {
     if (ui_sleep_screen == NULL)

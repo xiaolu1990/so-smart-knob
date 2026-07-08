@@ -115,35 +115,55 @@ uint8_t ui_main_screen_get_icon_id(void)
 }
 
 /**
- * @brief Scroll the main screen menu with the knob rotation
- * @details each time the knob is rotated, the menu will scroll to the next or previous card item based on the direction of rotation
- *
- * @param dir Direction to scroll (positive for right, negative for left)
+ * @brief Handle knob rotation events on the main screen
+ * 
+ * @param event 
  */
-void ui_main_screen_knob_rotate(int dir)
+void ui_main_screen_knob_rotate(ui_knob_event_t event)
 {
     if (ui_menu_container == NULL)
+        return;
+
+    if (event != UI_KNOB_LEFT && event != UI_KNOB_RIGHT)
         return;
 
     lv_coord_t step = lv_obj_get_width(lv_obj_get_child(ui_menu_container, 0)) + lv_obj_get_style_pad_column(ui_menu_container, 0);
 
     lv_coord_t current_x = lv_obj_get_scroll_x(ui_menu_container);
-    lv_coord_t target_x = current_x + (dir < 0 ? step : -step);
+    lv_coord_t target_x = current_x + (event == UI_KNOB_LEFT ? step : -step);
 
     // lv_obj_scroll_to_x(ui_menu_container, target_x, LV_ANIM_ON);
     lv_obj_scroll_to_x(ui_menu_container, target_x, LV_ANIM_OFF);
 }
 
-/**
- * @brief Activate the currently selected menu item by knob press
- * @details This function simulates a click event on the currently selected menu item when the knob is pressed.
- */
-void ui_main_screen_knob_activate_selected(void)
-{
-    if (ui_main_menu_selected_btn == NULL)
-        return;
 
-    lv_event_send(ui_main_menu_selected_btn, LV_EVENT_CLICKED, NULL);
+/**
+ * @brief Handle knob press events on the main screen
+ * 
+ * @param event 
+ */
+void ui_main_screen_knob_press(ui_button_event_t event)
+{  
+    if (event == UI_BUTTON_SINGLE_CLICK)
+    {
+        if (ui_main_menu_selected_btn == NULL)
+            return;
+
+        if (!is_sleeping)
+            lv_event_send(ui_main_menu_selected_btn, LV_EVENT_CLICKED, NULL);
+    }
+    else if (event == UI_BUTTON_LONG_PRESS_START)
+    {
+        // Handle long press start event if needed
+    }
+    else if (event == UI_BUTTON_LONG_PRESS_HOLD)
+    {
+        // Handle long press hold event if needed
+    }
+    else if (event == UI_BUTTON_LONG_PRESS_UP)
+    {
+        // Handle long press up event if needed
+    }
 }
 
 /**

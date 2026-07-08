@@ -30,15 +30,12 @@ void LVGL_knob_event(ui_knob_event_t event)
 
     if (lv_scr_act() == ui_main_screen)
     {
-        if (event == UI_KNOB_LEFT)
-        {
-            ui_main_screen_knob_rotate(-1);
-        }
-        else if (event == UI_KNOB_RIGHT)
-        {
-            ui_main_screen_knob_rotate(1);
-        }
+        ui_main_screen_knob_rotate(event);
     }
+
+    event = UI_KNOB_NONE; // Reset the event after handling
+
+    return;
 }
 
 /**
@@ -48,13 +45,14 @@ void LVGL_knob_event(ui_knob_event_t event)
  */
 void LVGL_button_event(ui_button_event_t event)
 {
-    if (lv_scr_act() != ui_main_screen)
-        return;
-
-    if (event == UI_BUTTON_SINGLE_CLICK)
+    if (lv_scr_act() == ui_main_screen)
     {
-        ui_main_screen_knob_activate_selected();
+        ui_main_screen_knob_press(event);
     }
+
+    event = UI_BUTTON_NONE_PRESS; // Reset the event after handling
+    
+    return;
 }
 
 /**

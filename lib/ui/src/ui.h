@@ -89,8 +89,8 @@ extern "C"
     // SCREEN: ui_main_screen
     void ui_main_screen_init(void);
     uint8_t ui_main_screen_get_icon_id(void);
-    void ui_main_screen_knob_rotate(int dir);
-    void ui_main_screen_knob_activate_selected(void);
+    void ui_main_screen_knob_rotate(ui_knob_event_t event);
+    void ui_main_screen_knob_press(ui_button_event_t event);
 
     extern lv_obj_t *ui_main_screen;                 // main screen object
     extern lv_obj_t *ui_main_menu_selected_btn;      // the currently selected button in the menu container
