@@ -121,7 +121,11 @@ extern "C"
 
     extern lv_obj_t *ui_sleep_screen; // sleep screen object
 
-    extern bool is_sleeping;               // flag to indicate if the device is in sleep mode
+    // main.cpp
+    bool ui_set_display_brightness(int percent);
+
+    extern bool is_sleeping; // flag to indicate if the device is in sleep mode
+
     extern lv_timer_t *screen_sleep_timer; // Timer to check for sleep timeout
     extern lv_obj_t *ui_initial_actions;
 
