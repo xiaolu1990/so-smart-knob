@@ -31,6 +31,14 @@ void ui_main_screen_init(void)
     ui_main_screen = lv_obj_create(NULL);
     lv_obj_clear_flag(ui_main_screen, LV_OBJ_FLAG_SCROLLABLE);
 
+    static lv_style_t style_main_screen;
+    lv_style_init(&style_main_screen);
+    lv_style_set_text_font(&style_main_screen, &lv_font_montserrat_20);
+    lv_style_set_text_color(&style_main_screen, UI_COLOR_LILA);
+    
+    lv_obj_add_style(ui_main_screen, &style_main_screen, 0);
+
+    // -- create a tileview to hold the main screen and settings screen tiles --
     lv_obj_t *tv_main = lv_tileview_create(ui_main_screen);
     lv_obj_set_size(tv_main, SCREEN_WIDTH, SCREEN_HEIGHT);
     lv_obj_set_style_anim_time(tv_main, 200, 0);
@@ -39,14 +47,10 @@ void ui_main_screen_init(void)
     // -- create a tile for the main screen and set it as the initial tile --
     lv_obj_t *tile_main = lv_tileview_add_tile(tv_main, 0, 0, LV_DIR_BOTTOM);
 
+    lv_obj_add_style(tile_main, &style_main_screen, 0);
     lv_obj_set_style_bg_img_src(tile_main, &background, 0);
     lv_obj_clear_flag(tile_main, LV_OBJ_FLAG_SCROLLABLE);
 
-    static lv_style_t style_main_screen;
-    lv_style_init(&style_main_screen);
-    lv_style_set_text_font(&style_main_screen, &lv_font_montserrat_20);
-    lv_style_set_text_color(&style_main_screen, UI_COLOR_LILA);
-    lv_obj_add_style(tile_main, &style_main_screen, 0);
 
     lv_obj_set_layout(tile_main, LV_LAYOUT_FLEX);
     lv_obj_set_flex_flow(tile_main, LV_FLEX_FLOW_COLUMN);
