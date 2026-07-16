@@ -28,7 +28,7 @@ void ui_splash_screen_init(void)
 static void splash_timer_cb(lv_timer_t *timer)
 {
     // 1. Create and load the main screen
-    ui_main_screen_init();
+    ui_main_screen_init(ui_main_screen_style);
     lv_disp_load_scr(ui_main_screen);
 
     // 2. Clean up the splash screen to free memory

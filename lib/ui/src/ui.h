@@ -12,6 +12,12 @@ extern "C"
 #include "ui_events.h"
 
     // Typedefs
+    typedef enum
+    {
+        UI_STYLE_CARD_MENU = 0,
+        UI_STYLE_RADIAL_MENU,
+    } ui_style_t;
+
     typedef struct
     {
         const lv_img_dsc_t *image;
@@ -60,6 +66,7 @@ extern "C"
 // COLORS
 #define UI_COLOR_BLACK lv_color_hex(0x000000)
 #define UI_COLOR_WHITE lv_color_hex(0xFFFFFF)
+#define UI_COLOR_YELLOW lv_color_hex(0xFFFF00)
 #define UI_COLOR_LILA lv_color_hex(0x622181)       // #622181
 #define UI_COLOR_LIGHT_GRAY lv_color_hex(0xD3D3D3) // #D3D3D3
 
@@ -87,15 +94,16 @@ extern "C"
     extern lv_obj_t *ui_splash_screen; // splash screen object
 
     // SCREEN: ui_main_screen
-    void ui_main_screen_init(void);
+    void ui_main_screen_init(ui_style_t style);
     uint8_t ui_main_screen_get_icon_id(void);
-    void ui_main_screen_knob_rotate(ui_knob_event_t event);
+    void ui_main_screen_knob_rotate(ui_knob_event_t event, ui_style_t style);
     void ui_main_screen_knob_press(ui_button_event_t event);
 
     extern lv_obj_t *ui_main_screen;                 // main screen object
     extern lv_obj_t *ui_main_menu_selected_btn;      // the currently selected button in the menu container
     extern uint32_t ui_main_menu_selected_btn_index; // the index of the currently selected button in the menu container
-    extern ui_icon_t main_menu_icons[];              // array of main menu icons
+    extern ui_icon_t main_menu_icons[5];             // array of main menu icons
+    extern ui_style_t ui_main_screen_style;          // current style of the main screen (card or radial)
 
     // SCREEN: ui_conf_screen
     void ui_conf_screen_init(uint8_t main_menu_icon_id);
@@ -121,7 +129,11 @@ extern "C"
 
     extern lv_obj_t *ui_sleep_screen; // sleep screen object
 
-    extern bool is_sleeping;               // flag to indicate if the device is in sleep mode
+    // main.cpp
+    bool ui_set_display_brightness(int percent);
+
+    extern bool is_sleeping; // flag to indicate if the device is in sleep mode
+
     extern lv_timer_t *screen_sleep_timer; // Timer to check for sleep timeout
     extern lv_obj_t *ui_initial_actions;
 

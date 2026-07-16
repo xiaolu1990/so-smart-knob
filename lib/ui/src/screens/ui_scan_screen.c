@@ -156,7 +156,7 @@ static void menu_icon_click_event_cb(lv_event_t *e)
         break;
     case 2: // Home
         if (ui_main_screen == NULL)
-            ui_main_screen_init();
+            ui_main_screen_init(ui_main_screen_style);
 
         lv_disp_load_scr(ui_main_screen);
         ui_scan_screen_destroy();

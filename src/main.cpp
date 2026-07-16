@@ -24,8 +24,35 @@ using namespace esp_panel::board;
 lv_timer_t *screen_sleep_timer = NULL; // Timer to check for sleep timeout
 bool is_sleeping = false;
 
+/* Display panel definition */
+Board *board;
+
 /*Knob event definition*/
 ESP_Knob *knob;
+
+/**
+ * @brief a C-callable function to set the display brightness, can be called from C code
+ * 
+ */
+extern "C" bool ui_set_display_brightness(int percent)
+{
+    if (board == nullptr || board->getBacklight() == nullptr)
+    {
+        return false;
+    }
+
+    if (percent < 0)
+    {
+        percent = 0;
+    }
+    else if (percent > 100)
+    {
+        percent = 100;
+    }
+
+    return board->getBacklight()->setBrightness(percent);
+}
+
 static void knob_left_event_cb(int count, void *usr_data)
 {
     // Serial.printf("Detect left event, count is %d\n", count);
@@ -89,7 +116,7 @@ void setup()
     Serial.begin(115200);
 
     Serial.println("Initializing board");
-    Board *board = new Board();
+    board = new Board();
     board->init();
 #if LVGL_PORT_AVOID_TEARING_MODE
     auto lcd = board->getLCD();
@@ -108,7 +135,17 @@ void setup()
     }
 #endif
 #endif
-    assert(board->begin());
+    assert(board->begin());  
+
+    auto display_backlight = board->getBacklight();
+    if (display_backlight)
+    {
+        display_backlight->setBrightness(20); // default brightness to 20%
+    }
+    else
+    {
+        Serial.println("Backlight device not found");
+    }
 
     Serial.println("Initializing LVGL");
     lvgl_port_init(board->getLCD(), board->getTouch());

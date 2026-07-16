@@ -142,7 +142,7 @@ static void menu_icon_click_event_cb(lv_event_t *e)
         case 4:
             // Handle back icon action, return to main screen
             if (ui_main_screen == NULL)
-                ui_main_screen_init();
+                ui_main_screen_init(ui_main_screen_style);
 
             lv_disp_load_scr(ui_main_screen);
             // Clean up the configuration screen to free memory

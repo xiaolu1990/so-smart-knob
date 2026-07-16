@@ -30,7 +30,7 @@ void LVGL_knob_event(ui_knob_event_t event)
 
     if (lv_scr_act() == ui_main_screen)
     {
-        ui_main_screen_knob_rotate(event);
+        ui_main_screen_knob_rotate(event, ui_main_screen_style);
     }
 
     event = UI_KNOB_NONE; // Reset the event after handling
