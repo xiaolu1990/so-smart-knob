@@ -55,6 +55,22 @@ void ui_main_screen_init(ui_style_t style)
 }
 
 /**
+ * @brief Destroy the main screen and free up memory
+ * 
+ */
+void ui_main_screen_destroy(void)
+{
+    if (ui_main_screen != NULL)
+    {
+        lv_obj_del(ui_main_screen);
+        ui_main_screen = NULL;
+        ui_menu_container = NULL;
+        ui_label_item = NULL;
+        ui_label_debug = NULL;
+    }
+}
+
+/**
  * @brief Create and load the main screen in card view
  *
  */
@@ -143,6 +159,7 @@ static void ui_main_screen_card_menu_init(void)
     // lv_obj_update_layout(ui_menu_container);
     // update_menu_state(ui_menu_container, true, true);
 
+    lv_event_send(ui_menu_container, LV_EVENT_SCROLL_END, NULL); // manually trigger a scroll event to ensure the first item is centered
     lv_event_send(ui_menu_container, LV_EVENT_SCROLL_END, NULL); // manually trigger a scroll event to ensure the first item is centered
 
     // -- create a label for debugging purposes --

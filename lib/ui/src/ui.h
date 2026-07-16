@@ -95,6 +95,7 @@ extern "C"
 
     // SCREEN: ui_main_screen
     void ui_main_screen_init(ui_style_t style);
+    void ui_main_screen_destroy(void);
     uint8_t ui_main_screen_get_icon_id(void);
     void ui_main_screen_knob_rotate(ui_knob_event_t event, ui_style_t style);
     void ui_main_screen_knob_press(ui_button_event_t event);
@@ -128,6 +129,12 @@ extern "C"
     void ui_sleep_screen_knob_rotate(void);
 
     extern lv_obj_t *ui_sleep_screen; // sleep screen object
+
+    // SCREEN: ui_disp_settings_screen
+    void ui_display_settings_screen_init(void);
+    void ui_display_settings_screen_destroy(void);
+
+    extern lv_obj_t *ui_disp_settings_screen; // display settings screen object
 
     // main.cpp
     bool ui_set_display_brightness(int percent);

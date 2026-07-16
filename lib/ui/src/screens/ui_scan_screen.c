@@ -129,8 +129,8 @@ static void menu_icon_click_event_cb(lv_event_t *e)
     {
     case 0: // Play
         state_scan_in_progress = true;
-        lv_obj_add_flag(ui_spinner_scan_busy_static, LV_OBJ_FLAG_HIDDEN);   // hide the static spinner arc when scanning stops
-        lv_obj_clear_flag(ui_spinner_scan_busy, LV_OBJ_FLAG_HIDDEN); // show the spinner when scanning starts
+        lv_obj_add_flag(ui_spinner_scan_busy_static, LV_OBJ_FLAG_HIDDEN); // hide the static spinner arc when scanning stops
+        lv_obj_clear_flag(ui_spinner_scan_busy, LV_OBJ_FLAG_HIDDEN);      // show the spinner when scanning starts
 
         if (state_enable_hr && state_egs)
             lv_label_set_text_static(ui_label_debug, "Scan Started\nHR ON, EGS ON");
@@ -154,11 +154,17 @@ static void menu_icon_click_event_cb(lv_event_t *e)
 
         lv_obj_update_layout(ui_scan_screen);
         break;
-    case 2: // Home
-        if (ui_main_screen == NULL)
-            ui_main_screen_init(ui_main_screen_style);
+    // case 2: // Home
+    //     if (ui_main_screen == NULL)
+    //         ui_main_screen_init(ui_main_screen_style);
 
-        lv_disp_load_scr(ui_main_screen);
+    //     lv_disp_load_scr(ui_main_screen);
+    //     ui_scan_screen_destroy();
+    //     break;
+    case 2: // Display Settings
+        ui_display_settings_screen_init();
+
+        lv_disp_load_scr(ui_disp_settings_screen);
         ui_scan_screen_destroy();
         break;
     default:
